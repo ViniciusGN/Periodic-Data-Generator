@@ -1,5 +1,6 @@
-# Travail Pratique 2 - Systèmes d’exploitation (Processus)
+# Travail Pratique 2 - Systèmes d’exploitation (Système POSIX)
 Systems d"Exploitation<br>
+génération périodique de données<br>
 Vinicius Giovani MOREIRA NASCIMENTO
 
 ### Pour compiler le projet, ouvrez un terminal dans le dossier `tp02` et tapez :

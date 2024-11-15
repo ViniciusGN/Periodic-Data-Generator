@@ -1,5 +1,5 @@
-TARGET1 = iplot
-TARGET2 = complement
+TARGET1 = periodic
+# TARGET2 = graphic
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
@@ -8,26 +8,28 @@ SRC_DIR = src
 FILE_DIR = files
 BUILD_DIR = built
 
-SRCS1 = $(SRC_DIR)/main.c $(SRC_DIR)/iplot.c
-SRCS2 = $(SRC_DIR)/complement.c
+SRCS1 = $(SRC_DIR)/main.c $(SRC_DIR)/sin_cos.c $(SRC_DIR)/sin_cos_g.c
+# SRCS2 = $(SRC_DIR)/sin_cos_g.c
 OBJS1 = $(SRCS1:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
-OBJS2 = $(SRCS2:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+# OBJS2 = $(SRCS2:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
-all: $(TARGET1) $(TARGET2)
+all: $(TARGET1) # $(TARGET2)
 
 $(TARGET1): $(OBJS1)
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET1) $(OBJS1)
 
-$(TARGET2): $(OBJS2)
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET2) $(OBJS2)
+# $(TARGET2): $(OBJS2)
+#	@mkdir -p $(BUILD_DIR)
+#	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET2) $(OBJS2)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 clean:
-	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/$(TARGET1) $(BUILD_DIR)/$(TARGET2)
+	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/$(TARGET1)
+
+# $(BUILD_DIR)/$(TARGET2)
 
 .PHONY: all clean

@@ -4,41 +4,43 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
+#include "../include/sin_cos.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <B> [-i]\n", argv[0]);
-        return 1;
-    }
+    char *filepath_cos_graphic = "../files/commande_cos.gp";
+    char *filepath_sen_graphic = "../files/commande_sin.gp";
+ 
+    pid_t childPid1, childPid2;
+    float angle = 0.0;
 
-    char *B = argv[1];
-    int interval_type = 0;
-    char *filepath = "commandes.gp";
-
-    if (argc == 3 && strcmp(argv[2], "-i") == 0) {
-        interval_type = 1;
-    }
-
-    pid_t childPid;
-
-    if (create_file(B, interval_type, filepath) == 1) {
-        printf("File commandes.gp is created in folder 'file'!\n");
-    }
-
-    switch (childPid = fork()) {
-        case -1:
-            perror("Error forking process");
+    childPid1 = fork();
+    childPid2 = fork();
+    
+    while(angle <= 360.0){
+        if(childPid1 == 0){
+            singal(SIGUSR1, calcul_cos_sin(1, angle));
+            kill(childPid2, SIGUSR1);
+        }else{
+            perror("Error forking process Child One...");
             exit(EXIT_FAILURE);
-        case 0:
-            printf("In child process, PID: %d\n", getpid());
-            plot_data(filepath);
-            break;
-        default:
-            printf("In parent process, PID: %d\n", getpid());
-            break;
+        }
+
+        if(childPid2 == 0){
+            singal(SIGUSR2, calcul_cos_sin(1, angle));
+            kill(childPid1, SIGUSR2);
+        } else{
+            perror("Error forking process Child Two...");
+            exit(EXIT_FAILURE);
+        }
+        angle += 10.0;
     }
 
+    wait(NULL);
+    wait(NULL);
+
+    printf("Father Process (%d): Ending...", getpid());
     return 0;
 }
 
