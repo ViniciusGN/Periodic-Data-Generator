@@ -9,34 +9,37 @@ void plot_data(const char *filepath) {
     exit(EXIT_FAILURE);
 }
 
-double calcul_cos_sin(int type, float angle){
+double calcul_cos_sin(int type, float angle) {
     double radians = angle * (M_PI / 180.0);
-    switch(type){
-        case 1: return sin(radians);
-        case 2: return cos(radians);
+    if (type == 1) {
+        return sin(radians);
+    } else if (type == 2) {
+        return cos(radians);
+    } else {
+        fprintf(stderr, "Invalid type for calculation: %d\n", type);
+        exit(EXIT_FAILURE);
     }
 }
 
-void print_data(int type, int child_number, int pid_child, double value, float angle){
+void print_data(int type, int child_number, int pid_child, double value, float angle) {
     char *filepath_cos_data = "../files/cosinus.txt";
     char *filepath_sin_data = "../files/sinus.txt";
 
-    switch(type){
-        case 1:
-            printf("Fils %d (%d): sinus(%f)    =   %f", child_number, pid_child, angle, value);
-            register_data(type, angle, value, filepath_sin_data);
-            break;
-        case 2:
-            printf("Fils %d (%d): cosinus(%f)  =   %f", child_number, pid_child, angle, value);
-            register_data(type, angle, value, filepath_cos_data);
-            break;
+    if (type == 1) {
+        printf("Fils %d (%d): sinus(%f) = %f\n", child_number, pid_child, angle, value);
+        register_data(type, angle, value, filepath_sin_data);
+    } else if (type == 2) {
+        printf("Fils %d (%d): cosinus(%f) = %f\n", child_number, pid_child, angle, value);
+        register_data(type, angle, value, filepath_cos_data);
     }
-
 }
 
-void register_data(int type, float angle, double value, const char *filepath){
-    FILE *pont_file;
-    pont_file = fopen(filepath, "a");
+void register_data(int type, float angle, double value, const char *filepath) {
+    FILE *pont_file = fopen(filepath, "a");
+    if (pont_file == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
     fprintf(pont_file, "%f %f\n", angle, value);
     fclose(pont_file);
 }
