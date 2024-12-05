@@ -21,18 +21,23 @@ int main(int argc, char *argv[]) {
     char *filepath_sin_graphic = "../files/commande_sin.gp";
  
     pid_t childPid1, childPid2;
+    printf('here5');
 
     childPid1 = fork();
     if (childPid1 == 0) {
+        printf('here6');
         signal(SIGUSR1, handle_sigusr1);
         while (angle <= 360) {
             double value = calcul_cos_sin(1, angle);
+            printf('here3');
             print_data(1, 1, getpid(), value, angle);
+            printf('here4');
             kill(getppid(), SIGUSR2);
             pause();
         }
         exit(EXIT_SUCCESS);
     } else if (childPid1 > 0) {
+        printf('here7');
         childPid2 = fork();
         if (childPid2 == 0) {
             signal(SIGUSR2, handle_sigusr2);

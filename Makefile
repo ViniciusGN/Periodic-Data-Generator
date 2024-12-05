@@ -17,7 +17,7 @@ all: $(TARGET1) # $(TARGET2)
 
 $(TARGET1): $(OBJS1)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET1) $(OBJS1)
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET1) $(OBJS1) -lm
 
 # $(TARGET2): $(OBJS2)
 #	@mkdir -p $(BUILD_DIR)

@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "stdlib.h": "c",
-        "sin_cos.h": "c"
+        "sin_cos.h": "c",
+        "types.h": "c",
+        "sin_cos_g.h": "c"
     }
 }

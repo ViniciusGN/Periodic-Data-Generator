@@ -1,7 +1,11 @@
 #include "../include/sin_cos.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 void plot_data(const char *filepath) {
     execlp("gnuplot", "gnuplot", "-persist", filepath, NULL);
@@ -22,15 +26,14 @@ double calcul_cos_sin(int type, float angle) {
 }
 
 void print_data(int type, int child_number, int pid_child, double value, float angle) {
-    char *filepath_cos_data = "../files/cosinus.txt";
-    char *filepath_sin_data = "../files/sinus.txt";
-
     if (type == 1) {
         printf("Fils %d (%d): sinus(%f) = %f\n", child_number, pid_child, angle, value);
-        register_data(type, angle, value, filepath_sin_data);
+        printf('here1');
+        register_data(type, angle, value, "../files/sinus.txt");
+        printf('here2');
     } else if (type == 2) {
         printf("Fils %d (%d): cosinus(%f) = %f\n", child_number, pid_child, angle, value);
-        register_data(type, angle, value, filepath_cos_data);
+        register_data(type, angle, value, "../files/cosinus.txt");
     }
 }
 
