@@ -1,74 +1,119 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include "../include/sin_cos.h"
+#include "../include/sin_cos_g.h"
 
-volatile sig_atomic_t angle = 0;
+#define MAX_ANGLE 360
+#define STEP 10
 
-void handle_sigusr1(int sig) {
-    angle += 10;
+pid_t child1_pid, child2_pid;
+volatile sig_atomic_t angle = 0; 
+
+void child1_handler(int signum) {
+    double value = calcul_cos_sin(1, (float)angle);
+    print_data(1, 1, getpid(), value, (float)angle);
+
+    angle += STEP;
+    if (angle > MAX_ANGLE) {
+        kill(getppid(), SIGUSR1);
+        exit(0);
+    }
 }
 
-void handle_sigusr2(int sig) {
-    angle += 10;
+void child2_handler(int signum) {
+    double value = calcul_cos_sin(2, (float)angle);
+    print_data(2, 2, getpid(), value, (float)angle);
+
+    angle += STEP;
+    if (angle > MAX_ANGLE) {
+        kill(getppid(), SIGUSR1);
+        exit(0);
+    }
 }
 
-int main(int argc, char *argv[]) {
-    char *filepath_cos_graphic = "../files/commande_cos.gp";
-    char *filepath_sin_graphic = "../files/commande_sin.gp";
- 
-    pid_t childPid1, childPid2;
-    printf('here5');
+void alarm_handler(int signum) {
+    static int active_child = 1;
 
-    childPid1 = fork();
-    if (childPid1 == 0) {
-        printf('here6');
-        signal(SIGUSR1, handle_sigusr1);
-        while (angle <= 360) {
-            double value = calcul_cos_sin(1, angle);
-            printf('here3');
-            print_data(1, 1, getpid(), value, angle);
-            printf('here4');
-            kill(getppid(), SIGUSR2);
-            pause();
-        }
-        exit(EXIT_SUCCESS);
-    } else if (childPid1 > 0) {
-        printf('here7');
-        childPid2 = fork();
-        if (childPid2 == 0) {
-            signal(SIGUSR2, handle_sigusr2);
-            while (angle <= 360) {
-                double value = calcul_cos_sin(2, angle);
-                print_data(2, 2, getpid(), value, angle);
-                kill(getppid(), SIGUSR1);
-                pause(); 
-            }
-            exit(EXIT_SUCCESS);
-        } else if (childPid2 > 0) {
-            signal(SIGUSR1, SIG_IGN);
-            signal(SIGUSR2, SIG_IGN);
-
-            kill(childPid1, SIGUSR1);
-
-            wait(NULL);
-            wait(NULL);
-
-            plot_data(filepath_sin_graphic);
-            plot_data(filepath_cos_graphic);
-
-            printf("Father Process (%d): Ending...\n", getpid());
-        } else {
-            perror("Error forking process Child Two...");
-            exit(EXIT_FAILURE);
-        }
-    } else {
-        perror("Error forking process Child One...");
-        exit(EXIT_FAILURE);
+    if (angle > MAX_ANGLE) {
+        return; 
     }
 
-    return EXIT_SUCCESS;
+    if (active_child == 1) {
+        kill(child1_pid, SIGUSR1);
+        active_child = 2;
+    } else {
+        kill(child2_pid, SIGUSR1);
+        active_child = 1;
+    }
+
+    alarm(1);
+}
+
+void restart_processes() {
+    waitpid(child1_pid, NULL, 0);
+    waitpid(child2_pid, NULL, 0);
+
+    printf("Restarting with new processes for plotting...\n");
+
+    if ((child1_pid = fork()) == 0) {
+        printf("Graphic for cosinus by PID %d.\n", getpid());
+        plot_data("./commande_cos.gp");
+    }
+
+    if ((child2_pid = fork()) == 0) {
+        printf("Graphic for sinus by PID %d.\n", getpid());
+        plot_data("./commande_sin.gp");
+    }
+
+    waitpid(child1_pid, NULL, 0);
+    waitpid(child2_pid, NULL, 0);
+
+    printf("Plotting completed. Program terminated.\n");
+    exit(0);
+}
+
+void termination_handler(int signum) {
+    restart_processes();
+}
+
+int main() {
+    struct sigaction sa_alarm, sa_child1, sa_child2, sa_termination;
+
+    sa_alarm.sa_handler = alarm_handler;
+    sigemptyset(&sa_alarm.sa_mask);
+    sa_alarm.sa_flags = 0;
+    sigaction(SIGALRM, &sa_alarm, NULL);
+
+    sa_termination.sa_handler = termination_handler;
+    sigemptyset(&sa_termination.sa_mask);
+    sa_termination.sa_flags = 0;
+    sigaction(SIGUSR1, &sa_termination, NULL);
+
+    if ((child1_pid = fork()) == 0) {
+        sa_child1.sa_handler = child1_handler;
+        sigemptyset(&sa_child1.sa_mask);
+        sa_child1.sa_flags = 0;
+        sigaction(SIGUSR1, &sa_child1, NULL);
+
+        while (1) pause();
+    }
+
+    if ((child2_pid = fork()) == 0) {
+        sa_child2.sa_handler = child2_handler;
+        sigemptyset(&sa_child2.sa_mask);
+        sa_child2.sa_flags = 0;
+        sigaction(SIGUSR1, &sa_child2, NULL);
+
+        while (1) pause();
+    }
+
+    angle = 0;
+    alarm(1);
+
+    while (1) pause();
+    return 0;
 }

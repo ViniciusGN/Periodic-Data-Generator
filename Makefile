@@ -2,11 +2,11 @@ TARGET1 = periodic
 # TARGET2 = graphic
 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -std=gnu11
 INCLUDE_DIR = include
 SRC_DIR = src
 FILE_DIR = files
-BUILD_DIR = built
+BUILD_DIR = bin
 
 SRCS1 = $(SRC_DIR)/main.c $(SRC_DIR)/sin_cos.c $(SRC_DIR)/sin_cos_g.c
 # SRCS2 = $(SRC_DIR)/sin_cos_g.c
@@ -28,7 +28,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 clean:
-	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/$(TARGET1)
+	rm -rf $(BUILD_DIR)
 
 # $(BUILD_DIR)/$(TARGET2)
 

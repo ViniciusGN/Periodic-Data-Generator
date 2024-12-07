@@ -5,6 +5,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void generate_graphics(const char *sin_filepath, const char *cos_filepath, const char *gnuplot_cmd_sin, const char *gnuplot_cmd_cos);
+void plot_data(const char *filepath);
 
 #endif // SIN_COS_G_H
